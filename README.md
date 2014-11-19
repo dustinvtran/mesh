@@ -28,7 +28,7 @@ is to calculate the cross product of the edge and the vector formed by the third
 node of the triangle. If the result is positive, then we will store the triangle
 to the right, otherwise it will be left. This is called `Winged Edge Data Structure`,
 which is a super efficient way of designing triangle-based mesh that allows every
-operation to be $\mathcal{O}(1)$.
+operation to be O(1).
 
 We also store a vector of `internal_triangle` objects, whose index refers to a
 triangle's index, and the internal triangle data refers to the associated
