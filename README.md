@@ -23,6 +23,13 @@ left of the vector from node `i` to the node `j`, where `i<j`), and also the
 template `E`, which is the edge value type one originally stores in a graph edge
 (`double` by default).
 
+The way we determine whether a triangle is on the left or right side of the edge
+is to calculate the cross product of the edge and the vector formed by the third
+node of the triangle. If the result is positive, then we will store the triangle
+to the right, otherwise it will be left. This is called `Winged Edge Data Structure`,
+which is a super efficient way of designing triangle-based mesh that allows every
+operation to be $\mathcal{O}(1)$.
+
 We also store a vector of `internal_triangle` objects, whose index refers to a
 triangle's index, and the internal triangle data refers to the associated
 information for each triangle.
