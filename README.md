@@ -4,12 +4,16 @@
 * Ye Kuang \<yekuang@g.harvard.edu\>
 * Dustin Tran \<dtran@g.harvard.edu\>
 
-### Description
+### Example
+```bash
+make shallow_water
+./shallow_water data/dam0.nodes data/dam0.tris
+```
 One can run the mesh on each of the three initial conditions by specifying `0`,
 `1`, or `2` for the third argument of the `shallow_water` binary; by default it
 uses the `DamBreak` condition.
 
-### Design Pattern
+### Description
 We store a `Graph` object templated with node value type (`double` by default)
 and edge value type `MeshEdgeValue`. `MeshEdgeValue` stores the left and right
 triangles of an edge (chosen such that the left triangle corresponds to the one
