@@ -37,7 +37,9 @@ stores a pointer `Mesh*` and one or two indices in order to keep track of the
 iterative procedure during incrementing and dereferencing.
 
 To avoid redundancy when setting up multiple initial conditions (and mostly for
-fun), we implement a Curiously Recursive Template Pattern. This constructs a
-base class from which each initial condition's class can inherit from, allowing
-the initial conditions to merely state the changes done onto node values, and
-then we run the same code to propagate this to the other values.
+fun), we implement a [Curiously Recursive Template
+Pattern](http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern).
+This constructs a base class from which each initial condition's class can
+inherit from, allowing the initial conditions to merely state the changes done
+onto node values, and then we run the same code to propagate this to the other
+values.
