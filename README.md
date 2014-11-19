@@ -5,13 +5,15 @@
 * Dustin Tran \<dtran@g.harvard.edu\>
 
 ### Example
+![](pond.gif)
 ```bash
 make shallow_water
-./shallow_water data/dam0.nodes data/dam0.tris
+./shallow_water data/pond3.nodes data/pond3.tris 0
 ```
-One can run the mesh on each of the three initial conditions by specifying `0`,
-`1`, or `2` for the third argument of the `shallow_water` binary; by default it
-uses the `DamBreak` condition.
+One can run the mesh on each of the three initial conditions by specifying `0`
+(a pebble ripple), `1` (a sharp wave), or `2` (a dam break) for the third
+argument of the `shallow_water` binary; by default it uses the `DamBreak`
+condition.
 
 ### Description
 We store a `Graph` object templated with node value type (`double` by default)
