@@ -110,8 +110,6 @@ struct EdgeFluxCalculator {
 struct NodePosition {
   template <typename NODE>
   Point operator()(const NODE& n) {
-    // HW4B: You may change this to plot something other than the
-    // positions of the nodes
     return {n.position().x, n.position().y, n.value().h};
   }
 };
@@ -395,7 +393,6 @@ int main(int argc, char* argv[])
   viewer.add_edges(mesh.edge_begin(), mesh.edge_end(), node_map);
 #endif
   viewer.center_view();
-  // HW4B: Timestep
   // CFL stability condition requires dt <= dx / max|velocity|
   // For the shallow water equations with u = v = 0 initial conditions
   //   we can compute the minimum edge length and maximum original water height
@@ -421,11 +418,7 @@ int main(int argc, char* argv[])
     post_process(mesh);
     
     // Update the viewer with new node positions
-    // HW4B: Need to define node_iterators before these can be used!
 #if 1
-    /*viewer.add_nodes(mesh.node_begin(), mesh.node_end(),
-                     CS207::DefaultColor(), NodePosition(), node_map);*/
-
     // Update viewer with nodes' new positions
     viewer.add_nodes(mesh.node_begin(), mesh.node_end(),
                      CS207::DefaultColor(), NodePosition(), node_map);

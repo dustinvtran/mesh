@@ -250,8 +250,7 @@ class Mesh {
       auto tri_right = triangle_right(edge);
       if (tri_left.valid()) {
         return ((n3 == tri_left.node(0) || n3 == tri_left.node(1) || n3 == tri_left.node(2)));
-      } 
-      else if (tri_right.valid()) {
+      } else if (tri_right.valid()) {
         return ((n3 == tri_right.node(0) || n3 == tri_right.node(1) || n3 == tri_right.node(2)));
       }
       return false;
@@ -344,22 +343,31 @@ class Mesh {
       return Point(dy, -dx, 0);
     }
   }
-  
+#if 0
   /** Functor to use Boost::transform_iterator */
   struct InternalToTriangleTransform {
     Triangle operator()(internal_triangle internal_tri) {
       return mesh_->triangle(internal_tri.index);
     }
   private:
-    InternalToTriangleTransform(const Mesh* m) : mesh_(const_cast<Mesh*>(m)) {
+    friend class Mesh;
+    InternalToTriangleTransform(Mesh* m) : mesh_(m) {
     }
 
     Mesh* mesh_;
   };
 
   /** Define the TriangleIterator type */
-  // using TriangleIterator_Boost = boost::transform_iterator<InternalToTriangleTransform, std::vector<internal_triangle>::const_iterator>;
+  using TriangleIterator = boost::transform_iterator<InternalToTriangleTransform, typename std::vector<internal_triangle>::const_iterator>;
   
+  TriangleIterator triangle_begin() const {
+      return {triangles_.begin(), InternalToTriangleTransform(this)};
+  }
+  
+  TriangleIterator triangle_end() const {
+      return {triangles_.end(), InternalToTriangleTransform(this)};
+  }
+#else
   class TriangleIterator : private totally_ordered<TriangleIterator> {
    public:
     // These type definitions help us use STL's iterator_traits.
@@ -416,7 +424,7 @@ class Mesh {
   TriangleIterator triangle_end() {
     return {this, num_triangles()};
   }
-  
+#endif
   node_iterator node_begin() {
     return graph_.node_begin();
   }
@@ -449,7 +457,7 @@ class Mesh {
 
     /** Construct invalid iterator. */
     NodeTriangleIterator() :
-      mesh_(nullptr), it_(incident_iterator()), it_end_(incident_iterator()), print_(false) {
+      mesh_(nullptr), it_(incident_iterator()), it_end_(incident_iterator()) {
     }
 
     /** Return the adjacent triangle at the iterator. */
@@ -476,23 +484,18 @@ class Mesh {
 
    private:
     friend class Mesh;
-    NodeTriangleIterator(const Mesh* m, incident_iterator it, incident_iterator it_end, bool pr) :
-      mesh_(const_cast<Mesh*>(m)), it_(it), it_end_(it_end), print_(pr) {
+    NodeTriangleIterator(const Mesh* m, incident_iterator it, incident_iterator it_end) :
+      mesh_(const_cast<Mesh*>(m)), it_(it), it_end_(it_end) {
       fix();
     }
 
     void fix() {
       while (it_ != it_end_) {
         auto edge = (*it_);
-        if(print_) {
-          std::cout << "e_n1: " << edge.node1().index() << ", e_n2: " << edge.node2().index() << 
-            ", e_left: " << edge.value().triangle_left << ", e_right: " << edge.value().triangle_right << std::endl;
-        }
         size_type tri_index = edge.node1() < edge.node2() ?
                  mesh_->triangle_left(edge).index() : mesh_->triangle_right(edge).index();
         if (tri_index == -1) {
           ++it_;
-          // std::cout << "fixed!" << std::endl;
         } 
         else {
           break;
@@ -503,24 +506,16 @@ class Mesh {
     Mesh* mesh_;
     incident_iterator it_;
     incident_iterator it_end_;
-    bool print_;
   };
 
   /** Return the iterator which corresponds to the first adjacent triangle. */
   NodeTriangleIterator adjacent_triangle_begin(const Node& node) const {
-    bool print = false;
-  #if 0
-    if (node.index() > 900 && node.index() < 1000) {
-      std::cout << "Node " << node.index() << "; degree: " << node.degree() << std::endl;
-      print = true;
-    }
-  #endif
-    return {this, node.edge_begin(), node.edge_end(), print};
+    return {this, node.edge_begin(), node.edge_end()};
   }
 
   /** Return the iterator which corresponds to the past-the-last adjacent triangle. */
   NodeTriangleIterator adjacent_triangle_end(const Node& node) const {
-    return {this, node.edge_end(), node.edge_end(), false};
+    return {this, node.edge_end(), node.edge_end()};
   }
 
   class TriTriangleIterator : private totally_ordered<TriTriangleIterator> {
@@ -585,11 +580,7 @@ class Mesh {
     auto B_pos = (std::max(edge.node1(), edge.node2())).position();
     double calculated_side = (B_pos.x - A_pos.x) * (pt.y - A_pos.y) - 
                           (B_pos.y - A_pos.y) * (pt.x - A_pos.x);
-    /*std::cout << "A_pos: " << A_pos << std::endl;       
-    std::cout << "B_pos: " << B_pos << std::endl;       
-    std::cout << "pt: " << pt << std::endl;                
-    std::cout << "calculated_side: " << (B_pos.x - A_pos.x) * (pt.y - A_pos.y) - 
-                          (B_pos.y - A_pos.y) * (pt.x - A_pos.x) << std::endl;*/
+
     assert(calculated_side != 0);
     return 0 < calculated_side;
   }
