@@ -1,10 +1,10 @@
-## Mesh
+# Mesh
 
 ### Authors
 * Ye Kuang \<yekuang@g.harvard.edu\>
 * Dustin Tran \<dtran@g.harvard.edu\>
 
-### Example
+## Examples
 ![](pond.gif)
 ```bash
 make shallow_water
@@ -15,8 +15,11 @@ One can run the mesh on each of the three initial conditions by specifying `0`
 argument of the `shallow_water` binary; by default it uses the `DamBreak`
 condition.
 
-### Description
-#### Design Pattern
+Also check out [k-ye/mcmc-viz](https://github.com/k-ye/mcmc-viz), which uses the
+mesh design to build a visualization tool for Markov chain Monte Carlo.
+
+## Description
+### Design Pattern
 We store a `Graph` object templated with node value type (`double` by default)
 and edge value type `MeshEdgeValue`. `MeshEdgeValue` stores the left and right
 triangles of an edge (chosen such that the left triangle corresponds to the one
@@ -35,7 +38,7 @@ We also store a vector of `internal_triangle` objects, whose index refers to a
 triangle's index, and the internal triangle data refers to the associated
 information for each triangle.
 
-#### Iterators
+### Iterators
 In order to iterate through all the triangles inside a `Mesh`, we define a class
 called `TriangleIterator`. which stores a pointer `Mesh*` and a `index_`, which
 points to the index of triangle being visited currently in that mesh.
@@ -45,7 +48,7 @@ define a class called `NodeTriangleIterator` and `TriTriangleIterator`, which
 stores a pointer `Mesh*` and one or two indices in order to keep track of the
 iterative procedure during incrementing and dereferencing.
 
-#### Initial Conditions
+### Initial Conditions
 To avoid redundancy when setting up multiple initial conditions (and mostly for
 fun), we implement a [Curiously Recursive Template
 Pattern](http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern).
