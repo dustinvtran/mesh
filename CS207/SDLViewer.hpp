@@ -24,6 +24,11 @@
 #include "Point.hpp"
 #include "Color.hpp"
 
+#include <boost/signals2/signal.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/function.hpp>
+
+
 
 namespace CS207 {
 
@@ -111,7 +116,14 @@ class SDLViewer {
   };
   friend struct safe_lock;
 
+  boost::signals2::signal<void (SDLKey)> keyboard_signals_;
  public:
+  /** Functions to handle keyboard events */
+  typedef boost::function<void (SDLKey)> KeyboardEvent;
+
+  void add_keyboard_listener(const KeyboardEvent& func) {
+    keyboard_signals_.connect(func);
+  }
 
     /** Constructor */
   SDLViewer()
@@ -531,6 +543,7 @@ class SDLViewer {
             || event.key.keysym.sym == SDLK_q)
           exit(0);
 
+        keyboard_signals_(event.key.keysym.sym);
         request_render();
       } break;
 

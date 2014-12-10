@@ -14,6 +14,7 @@
 
 #include <utility>
 
+#include <boost/iterator/transform_iterator.hpp>
 /** @class Graph
  * @brief A template for 3D undirected graphs.
  *
@@ -54,9 +55,10 @@ class Graph {
       Graph::num_edges(), and argument type of Graph::node(size_type) */
   typedef unsigned size_type;
 
+  struct UidToNodeTransform;
   /** Type of node iterators, which iterate over all graph nodes. */
   class NodeIterator;
-
+  /** Type of node range */
   struct NodeRange;
   /** Synonym for NodeIterator */
   typedef NodeIterator node_iterator;
@@ -64,6 +66,7 @@ class Graph {
   /** Type of edge iterators, which iterate over all graph edges. */
   class EdgeIterator;
 
+  /** Type of edge range */
   struct EdgeRange;
   /** Synonym for EdgeIterator */
   typedef EdgeIterator edge_iterator;
@@ -71,6 +74,7 @@ class Graph {
   /** Type of incident iterators, which iterate incident edges to a node. */
   class IncidentIterator;
 
+  /** Type of incident edges of a node range */
   struct IncidentRange;
   /** Synonym for IncidentIterator */
   typedef IncidentIterator incident_iterator;
@@ -376,7 +380,7 @@ class Graph {
   }
 
   /* Range object for iterating all the nodes in the graph */
-  NodeRange nodes() {
+  NodeRange nodes() const {
     return {*this};
   }
 
@@ -419,6 +423,10 @@ class Graph {
     /** Inspect @a value in this edge */
     const edge_value_type & value() const {
       return fetch().value;
+    }
+
+    size_type index() const {
+      return edge_uid_;
     }
 
     /** Test whether this edge and @a x are equal.
@@ -663,13 +671,12 @@ class Graph {
   }
 
   /* Range for iterating all the edges in the graph */
-  EdgeRange edges() {
+  EdgeRange edges() const {
     return {*this};
   }
   ///////////////
   // Iterators //
   ///////////////
-
   /** @class Graph::NodeIterator
 
    * @brief Iterator class for nodes. A forward iterator. 
