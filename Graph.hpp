@@ -10,7 +10,7 @@
 #include <cassert>
 
 #include "CS207/Util.hpp"
-#include "Point.hpp"
+#include "CS207/Point.hpp"
 
 #include <utility>
 
@@ -181,7 +181,7 @@ class Graph {
       assert(valid());
       return fetch().value;
     }
-    
+
     /*
     * Inspect @a value in this node, promise not to change value
     */
@@ -197,7 +197,7 @@ class Graph {
       assert(valid());
       return graph_->adjacent_[uid_].size();
     }
-    
+
     /*
     * An iterator points to the first edge that is incident to this node
     */
@@ -205,7 +205,7 @@ class Graph {
       assert(valid());
       return incident_iterator(graph_, uid_, 0);
     }
-    
+
     /*
     * An iterator points to the end of incident edges container
     */
@@ -233,7 +233,7 @@ class Graph {
     }
 
     /* Helper method to return the appropriate node.
-    *  Due to the fact that nodes are stored in vector, which 
+    *  Due to the fact that nodes are stored in vector, which
     *  supports random access. The complexity is O(1)
     */
     internal_node& fetch() const {
@@ -280,7 +280,7 @@ class Graph {
       // update @a free_uid_ to the next
       auto reused_uid = free_uid_;
       free_uid_ = nodes_[free_uid_].index;
-      // update related information for reused_uid, no need to push new element 
+      // update related information for reused_uid, no need to push new element
       // into @a nodes_ or @a adjacent_
       new_node.uid = reused_uid;
       nodes_[reused_uid] = new_node;
@@ -323,7 +323,7 @@ class Graph {
    * @post @a free_uid_ != -1
    * @post nodes_[@a free_uid_].index == old @free_uid_
    *
-   * Can invalidate outstanding iterators. 
+   * Can invalidate outstanding iterators.
    * If old has_node(@a n), then @a n becomes invalid, as do any
    * other Node objects equal to @a n. All other Node objects remain valid.
    *
@@ -359,13 +359,13 @@ class Graph {
 
   /** Remove a node from the graph.
    * @param[in] n_it Iterator references to a node that is to be deleted.
-   * @return If n_it points to a valid (*n_it), returns the iterator that points 
+   * @return If n_it points to a valid (*n_it), returns the iterator that points
    *  to the node next to old (*n_it); otherwise return node_end()
    *
    * @pre n_it should point to a valid node in graph or node_end()
    * @post new size() == old size() - result.
    *
-   * Can invalidate outstanding iterators. 
+   * Can invalidate outstanding iterators.
    * If old has_node(@a n), then @a n becomes invalid, as do any
    * other Node objects equal to @a n. All other Node objects remain valid.
    *
@@ -373,9 +373,9 @@ class Graph {
    */
   node_iterator remove_node(node_iterator n_it) {
 
-    if (n_it != node_end()) 
+    if (n_it != node_end())
       remove_node(*n_it);
-    
+
     return n_it;
   }
 
@@ -457,7 +457,7 @@ class Graph {
       size_type selfGreaterUid = (std::max(node1(), node2())).uid_;
       size_type xSmallerUid = (std::min(x.node1(), x.node2())).uid_;
       size_type xGreaterUid = (std::max(x.node1(), x.node2())).uid_;
-      
+
       if (graph_ != x.graph_)
         return graph_ < x.graph_;
       else if (selfSmallerUid != xSmallerUid)
@@ -483,7 +483,7 @@ class Graph {
     }
 
     /* Helper method to return the appropriate edge data.
-    *  Due to the fact that nodes are stored in vector @a edges_, which 
+    *  Due to the fact that nodes are stored in vector @a edges_, which
     *  supports random access. The complexity is O(1)
     */
     internal_edge& fetch() const {
@@ -570,7 +570,7 @@ class Graph {
   bool has_edge(const Node& a, const Node& b) const {
     assert(a.index() < size());
     assert(b.index() < size());
-    
+
     if (a.index() == b.index() || !(has_node(a) && has_node(b)))
       return false;
 
@@ -602,7 +602,7 @@ class Graph {
    *
    * @post new num_edges() == old num_edges() - result.
    *
-   * Can invalidate outstanding iterators. 
+   * Can invalidate outstanding iterators.
    * If old has_edge(@a a, @ b), then both @a Edge(a, b) and @a Edge(b,a)
    * becomes invalid. All other Edge objects remain valid.
    *
@@ -634,7 +634,7 @@ class Graph {
    *
    * @post new num_edges() == old num_edges() - result.
    *
-   * Can invalidate outstanding iterators. 
+   * Can invalidate outstanding iterators.
    * If old has_edge(e.node1(), e.node2()), then @ e becomes invalid.
    * All other Edge objects remain valid.
    *
@@ -650,7 +650,7 @@ class Graph {
    *
    * @post new num_edges() == old num_edges() - result.
    *
-   * Can invalidate outstanding iterators. If old @a (*e_it) exists in Graph, 
+   * Can invalidate outstanding iterators. If old @a (*e_it) exists in Graph,
    * @a (*e_it) becomes invalid. All other Edge objects remain valid.
    *
    * Complexity: O(degree).
@@ -658,15 +658,15 @@ class Graph {
   edge_iterator remove_edge(edge_iterator e_it) {
     if (e_it != edge_end()) {
       remove_edge((*e_it));
-      /* Because inside operator* function of edge_iterator, fix() is called. 
-      Thus calling the dereference function can eliminate possible problem. 
-      
+      /* Because inside operator* function of edge_iterator, fix() is called.
+      Thus calling the dereference function can eliminate possible problem.
+
       One thing I am not really sure is that, since the dereferenced object is been
       used in nowhere, will the compiler simply disgard this command for optimization purpose?
       */
       (*e_it);
     }
-    
+
     return e_it;
   }
 
@@ -679,7 +679,7 @@ class Graph {
   ///////////////
   /** @class Graph::NodeIterator
 
-   * @brief Iterator class for nodes. A forward iterator. 
+   * @brief Iterator class for nodes. A forward iterator.
    * @RI graph_ != nullptr && index_ <= graph_->num_nodes()
    */
   class NodeIterator : private totally_ordered<NodeIterator> {
@@ -705,7 +705,7 @@ class Graph {
     *  Return an instance of Node that this iterator currently points to
     */
     Node operator*() const {
-      return graph_->node(index_);  
+      return graph_->node(index_);
     }
 
     /* Forward the index this iterator points to by 1.
@@ -727,7 +727,7 @@ class Graph {
 
    private:
     friend class Graph;
-    
+
     NodeIterator(const Graph* g, size_type idx) :
     graph_(const_cast<Graph*>(g)), index_(idx) {
       assert(g != nullptr);
@@ -749,7 +749,7 @@ class Graph {
   }
 
   /** @class Graph::EdgeIterator
-   * @brief Iterator class for edges. A forward iterator. 
+   * @brief Iterator class for edges. A forward iterator.
    * @RI: @a graph_!=nullptr && @a curr_i_uid_ <= graph_->adjacent_.size()
    *      && graph_->adjacent_[curr_i_uid_].size() != 0
    *      && @a curr_i_uid_ < graph_->adjacent_[curr_i_uid_][curr_j_]
@@ -772,7 +772,7 @@ class Graph {
     /** Construct an invalid EdgeIterator. */
     EdgeIterator() {
     }
-    /* 
+    /*
     * Return an instance of Edge that this iterator currently points to
     */
     Edge operator*() {
@@ -802,8 +802,8 @@ class Graph {
 
    private:
     friend class Graph;
-    
-    EdgeIterator(const Graph *g, size_type i, size_type j) : 
+
+    EdgeIterator(const Graph *g, size_type i, size_type j) :
     graph_(const_cast<Graph*>(g)), curr_i_uid_(i), curr_j_(j) {
       assert(graph_ != nullptr);
       fix();
@@ -819,7 +819,7 @@ class Graph {
     * is the second node.index of the edge
     */
     size_type curr_j_;
-    
+
     /*First of all, if @a curr_j_ is greater than the degree node @a curr_i_uid_ has,
     * @a curr_j_ should be reset to zero, with @a curr_i_uid_ increased by 1.
     * Secondly, repeat increasing @a curr_i_uid_ by 1 if the node does not connect to any edge.
@@ -863,7 +863,7 @@ class Graph {
   edge_iterator edge_begin() const {
     return edge_iterator(this, 0, 0);
   }
-  
+
   /* Return an iterator points to the end of the edge container in this graph.
   */
   edge_iterator edge_end() const {
@@ -871,8 +871,8 @@ class Graph {
   }
 
   /** @class Graph::IncidentIterator
-   * @brief Iterator class for edges incident to a node. A forward iterator. 
-   * @RI graph_ != nullptr && spawn_uid_ < graph_->num_nodes() 
+   * @brief Iterator class for edges incident to a node. A forward iterator.
+   * @RI graph_ != nullptr && spawn_uid_ < graph_->num_nodes()
    *      && incident_j_ <= graph_->node(spawn_uid_).degree()
    * Notice that when dereference this iterator, the edge does not need to
    * hold the RI that edge.node1().index() < edge.node2().index()
@@ -895,7 +895,7 @@ class Graph {
     IncidentIterator() {
     }
 
-    /* 
+    /*
     * Return an instance of Edge that this iterator currently points to,
     * which should be an incident edge of the node which owns this iterator.
     */
@@ -903,7 +903,7 @@ class Graph {
       auto& edgeInfo = graph_->adjacent_[spawn_uid_][incident_j_];
       return Edge(graph_, spawn_uid_, edgeInfo.first, edgeInfo.second);
     }
-    
+
     /* Forward the index this iterator points to by one.
     *
     * @post Return the iterator after properly forwarded.
@@ -913,7 +913,7 @@ class Graph {
         ++incident_j_;
       return *this;
     }
-    
+
     /* Test whether two IncidentIterator instances are equal.
     * Same IncidentIterator instances have the same graph pointer, same spawn_node index and
     * same index of the incident edges.
@@ -933,7 +933,7 @@ class Graph {
     // Identify the current position of the incident edges container this iterator points to
     size_type incident_j_;
 
-    IncidentIterator(const Graph* g, size_type spawn, size_type idx) : 
+    IncidentIterator(const Graph* g, size_type spawn, size_type idx) :
     graph_(const_cast<Graph*>(g)), spawn_uid_(spawn), incident_j_(idx) {
       assert(graph_ != nullptr);
     }
@@ -1004,9 +1004,9 @@ class Graph {
   /* Internal data structure for storing all the data of a node.
   */
   struct internal_node {
-    /* Constructor 
+    /* Constructor
     * @a const_cast<type>(val) can cast a @a const type @val to non-const,
-    * given that the alias of @a val itself is non-const 
+    * given that the alias of @a val itself is non-const
     */
     internal_node(const Point& p, const node_value_type& v)
       : index(-1), uid(-1), position(p), value(v) {
@@ -1025,7 +1025,7 @@ class Graph {
   /* Internal data structure for storing all the data of a node.
   */
   struct internal_edge {
-    // data 
+    // data
     edge_value_type value;
 
     internal_edge(const edge_value_type& v) : value(v) {
@@ -1049,7 +1049,7 @@ class Graph {
   */
   int free_uid_;
 
-  /* Container implemented as adjacency list, store all the 
+  /* Container implemented as adjacency list, store all the
   * edge relationship between any two nodes given that they are connected.
   *
   * The index of the outer vector stands for the first node's Uid of the edge.
