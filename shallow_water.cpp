@@ -13,8 +13,8 @@
 #include "CS207/SDLViewer.hpp"
 #include "CS207/Util.hpp"
 #include "CS207/Color.hpp"
-#include "CS207/Point.hpp"
 
+#include "CS207/Point.hpp"
 #include "Mesh.hpp"
 
 // Standard gravity (average gravity at Earth's surface) in meters/sec^2
@@ -40,15 +40,15 @@ struct QVar {
   QVar operator+(const QVar& q) const {
     return {h + q.h, hx + q.hx, hy + q.hy};
   }
-
+  
   QVar operator-(const QVar& q) const {
     return {h - q.h, hx - q.hx, hy - q.hy};
   }
-
+  
   QVar operator*(double c) const {
     return {h * c, hx * c, hy * c};
   }
-
+  
   QVar operator/(double c) const {
     return {h / c, hx / c, hy / c};
   }
@@ -114,6 +114,17 @@ struct NodePosition {
   }
 };
 
+struct CoolColor
+{
+  /* data */
+  CS207::Color operator()(const Node& node) {
+    double val = 1.2 * (node.value().h - .8);
+    val = std::min(0.3, std::max(0.2, val));
+    //std::cout << node.value().h << std::endl;
+    return CS207::Color::make_heat(val);
+  }
+};
+
 
 /** Integrate a hyperbolic conservation law defined over the mesh m
  * with flux functor f by dt in time.
@@ -138,72 +149,33 @@ double hyperbolic_step(MESH& m, FLUX& f, double t, double dt) {
   std::vector<QVar> temp_fluxes(m.num_triangles(), QVar());
   for (auto tri_it = m.triangle_begin(); tri_it != m.triangle_end(); ++tri_it) {
     auto qk = (*tri_it).value();
-
+    
     QVar F_k(0, 0, 0);
     for (size_type i = 0; i < 3; ++i) {
       auto edge = (*tri_it).edge(i);
       QVar qm(0, 0, 0);
-      if (edge.value().triangle_left == -1 || edge.value().triangle_right == -1) {
+      if (m.adj_triangle1_index(edge) == -1 || m.adj_triangle2_index(edge) == -1) {
           //set_boundary_conditions
         qm = QVar(qk.h, 0, 0);
       } else {
-        auto adj_triangle = m.triangle_left(edge).index() == (*tri_it).index() ?
-            m.triangle_right(edge) : m.triangle_left(edge);
-        qm = adj_triangle.value();
+        size_type adj_tri_idx = m.adj_triangle1_index(edge) == (*tri_it).index() ?
+            m.adj_triangle2_index(edge) : m.adj_triangle1_index(edge);
+
+        auto adj_triangle = m.triangle(adj_tri_idx);
+        qm = adj_triangle.value(); 
       }
-      auto norm_ke = m.out_norm((*tri_it), edge);
+      auto norm_ke = m.out_norm((*tri_it), edge); 
       F_k = F_k + f(norm_ke.x, norm_ke.y, dt, qk, qm);
-    }
+    } 
     // print_triangle(m, (*tri_it), f, t, dt);
     temp_fluxes[(*tri_it).index()] = qk - F_k * (dt / (*tri_it).area());
   }
-
+  
   for (auto tri_it = m.triangle_begin(); tri_it != m.triangle_end(); ++tri_it) {
     (*tri_it).value() = temp_fluxes[(*tri_it).index()];
   }
-
+  
   return t + dt;
-}
-
-template <typename FLUX>
-void print_edge(const MeshType& mesh, const Triangle& tri, int edge_idx, FLUX& flux, double dt) {
-  std::cout << "  Edge " << edge_idx << " (" << tri.edge(edge_idx).node1().position() << ") (" <<
-    tri.edge(edge_idx).node2().position() << ")" << std::endl;
-  auto normal = mesh.out_norm(tri, tri.edge(edge_idx));
-  std::cout << "    Normal (" << normal << ")" << std::endl;
-
-  std::string left_print = tri.edge(edge_idx).value().triangle_left == -1 ? " " : std::to_string(tri.edge(edge_idx).value().triangle_left);
-  std::string right_print = tri.edge(edge_idx).value().triangle_right == -1 ? " " : std::to_string(tri.edge(edge_idx).value().triangle_right);
-  std::cout << "    Adj Triangles " << left_print << " " << right_print << std::endl;
-
-  int adj_tri_idx = tri.edge(edge_idx).value().triangle_left == tri.index() ?
-    tri.edge(edge_idx).value().triangle_right : tri.edge(edge_idx).value().triangle_left;
-
-  if (adj_tri_idx != -1 ) {
-    std::cout << "    Opposite Tri Qvar h=" << mesh.triangle(adj_tri_idx).value().h << " hu="
-      << mesh.triangle(adj_tri_idx).value().hx << " hv=" << mesh.triangle(adj_tri_idx).value().hy << std::endl;
-    auto fl = flux(normal.x, normal.y, dt, tri.value(), mesh.triangle(adj_tri_idx).value());
-    std::cout << "    Edge flux h=" << fl.h << " hu=" << fl.hx << " hv=" << fl.hy << std::endl;
-  } else {
-    std::cout << "    Opposite Tri Qvar h=" << tri.value().h << " hu=0 hv=0 " << std::endl;
-    auto fl = flux(normal.x, normal.y , dt, tri.value(), QVar(tri.value().h, 0, 0));
-    std::cout << "    Boundary flux h=" << fl.h << " hu=" << fl.hx << " hv=" << fl.hy << std::endl;
-  }
-}
-
-template <typename FLUX>
-void print_triangle(const MeshType& mesh, const Triangle& tri, FLUX& flux, double t, double dt) {
-  std::cout << std::endl;
-  std::cout << "Triangle " << tri.index() << " @" << t << std::endl;
-  std::cout << "  Area " << tri.area() << std::endl;
-  std::cout << "  Node positions (" << tri.node(0).position() << ") ("
-    << tri.node(1).position() << ") (" << tri.node(2).position() << ")" << std::endl;
-  std::cout << "  Triangle QVar h=" << tri.value().h <<
-    " hu=" << tri.value().hx << " hv=" << tri.value().hy << std::endl;
-
-  print_edge(mesh, tri, 0, flux, dt);
-  print_edge(mesh, tri, 1, flux, dt);
-  print_edge(mesh, tri, 2, flux, dt);
 }
 
 /** Convert the triangle-averaged values to node-averaged values for viewing. */
@@ -216,31 +188,13 @@ void post_process(MESH& m) {
       double total_area = 0;
       QVar Q_tot(0, 0, 0);
       int count = 0;
-  #if 0
-      if ((*nit).index() > 900 && (*nit).index() < 1000)
-        std::cout << "Node [" << (*nit).index() << "]" << std::endl;
-  #endif
+  
       for (auto tri_it = m.adjacent_triangle_begin(*nit); tri_it != m.adjacent_triangle_end(*nit); ++tri_it) {
-  #if 0
-        if ((*nit).index() > 900 && (*nit).index() < 1000) {
-          std::cout << "  Adjacent triangle " << (*tri_it).index() << " n0=" << (*tri_it).node(0).index() <<
-            " n1=" << (*tri_it).node(1).index() << " n2=" << (*tri_it).node(2).index() << std::endl;
-        }
-  #endif
         Q_tot = Q_tot + (*tri_it).value() * (*tri_it).area();
         total_area += (*tri_it).area();
         ++count;
       }
       (*nit).value() = Q_tot / total_area;
-  #if 0
-      if ((*nit).index() > 900 && (*nit).index() < 1000) {
-        std::cout << "  Num of triangles around node(" << (*nit).index() <<"): " << count << std::endl;
-        std::cout << "  Averaged QVar: h=" << (*nit).value().h << " hu=" << (*nit).value().hx << " hv=" << (*nit).value().hy << std::endl;
-        std::cout << std::endl;
-        std::cout << "  Total Areas: " << total_area << std::endl;
-        std::cout << std::endl;
-      }
-  #endif
   }
 }
 
@@ -249,12 +203,12 @@ template <typename T>
 struct BaseInitializer {
     std::pair<double, double> operator()(MeshType& mesh) const {
         double max_height = derived().initialize_node_values(mesh);
-
+        
         double min_edge_length = (*mesh.edge_begin()).length();
         for (auto eit = mesh.edge_begin(); eit != mesh.edge_end(); ++eit) {
             min_edge_length = std::min(min_edge_length, (*eit).length());
         }
-
+    
         for (auto tri_it = mesh.triangle_begin(); tri_it != mesh.triangle_end(); ++tri_it) {
             (*tri_it).value() = ((*tri_it).node(0).value() + (*tri_it).node(1).value() + (*tri_it).node(2).value()) / 3.0;
         }
@@ -262,14 +216,14 @@ struct BaseInitializer {
     }
   private:
     const T& derived() const {
-        return static_cast<const T&>(*this);
+        return static_cast<const T&>(*this);  
     }
 };
 
 struct PebbleRipple : public BaseInitializer<PebbleRipple> {
   private:
-    friend struct BaseInitializer<PebbleRipple>;
-
+    friend struct BaseInitializer<PebbleRipple>; 
+    
     double initialize_node_values(MeshType& mesh) const {
         double max_height = 0;
         for (auto nit = mesh.node_begin(); nit != mesh.node_end(); ++nit) {
@@ -287,17 +241,17 @@ struct PebbleRipple : public BaseInitializer<PebbleRipple> {
 struct SharpWave : public BaseInitializer<SharpWave> {
   private:
     friend struct BaseInitializer<SharpWave>;
-
+    
     double initialize_node_values(MeshType& mesh) const {
         double max_height = 0;
         for (auto nit = mesh.node_begin(); nit != mesh.node_end(); ++nit) {
             unsigned H = 0;
             if ((*nit).position().x < 0) H = 1;
-            (*nit).value() = QVar(1 + 0.75 * H * (pow(((*nit).position().x - 0.75), 2) +
+            (*nit).value() = QVar(1 + 0.75 * H * (pow(((*nit).position().x - 0.75), 2) + 
                       pow((*nit).position().y, 2) - 0.15 * 0.15), 0, 0);
             max_height = std::max(max_height, (*nit).value().h);
         }
-
+        
         return max_height;
     }
 
@@ -306,7 +260,7 @@ struct SharpWave : public BaseInitializer<SharpWave> {
 struct DamBreak : public BaseInitializer<DamBreak> {
   private:
     friend struct BaseInitializer<DamBreak>;
-
+    
     double initialize_node_values(MeshType& mesh) const {
         double max_height = 0;
         for (auto nit = mesh.node_begin(); nit != mesh.node_end(); ++nit) {
@@ -318,7 +272,7 @@ struct DamBreak : public BaseInitializer<DamBreak> {
             }
             max_height = std::max(max_height, (*nit).value().h);
         }
-
+        
         return max_height;
     }
 };
@@ -376,7 +330,7 @@ int main(int argc, char* argv[])
       std::cout << "Dam Break" << std::endl;
       value_pair = DamBreak()(mesh);
   }
-
+  
   double max_height = value_pair.first;
   double min_edge_length = value_pair.second;
 
@@ -416,12 +370,12 @@ int main(int argc, char* argv[])
     hyperbolic_step(mesh, f, t, dt);
     // Update node values with triangle-averaged values
     post_process(mesh);
-
+    
     // Update the viewer with new node positions
 #if 1
     // Update viewer with nodes' new positions
     viewer.add_nodes(mesh.node_begin(), mesh.node_end(),
-                     CS207::DefaultColor(), NodePosition(), node_map);
+                     CoolColor(), NodePosition(), node_map);
 #endif
     viewer.set_label(t);
 
