@@ -196,7 +196,7 @@ class SDLViewer {
 
       // Convenience aliases
       using size_type = typename G::size_type;
-      using node_type = typename G::node_type;
+      // using node_type = typename G::node_type;
 
       // Clear the data
       coords_.clear();
